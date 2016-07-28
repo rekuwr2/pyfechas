@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>Registro de Fechas - Nuevo</title>
+    </head>
+    <body>
+        <h1>Registro de Fechas - Nuevo</h1>
+        <form method="POST">
+            <div>
+                <label for="id_nombre"> Nombre </label>
+                <input id="id_nombre">
+                {% csrf_token %}
+            </div>
+            <button type="submit">Guardar cambios</button>
+        </form>
+
+    </body>
+</html>
