@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django.core.urlresolvers import resolve
+from django.core.urlresolvers import resolve, reverse_lazy, reverse
+from django.template.loader import render_to_string
 from django.test import TestCase
 from django.http import HttpRequest
 
-from .models import RegistroFechas
-from .views import new
+from registro_fechas.views import new, home
 
 
 class RegistroFechasTest(TestCase):
@@ -26,37 +26,29 @@ class RegistroFechasTest(TestCase):
         # TODO
         pass
 
-    def test_registro_fechas_renderiza_el_formulario_de_fechas(self):
-        found = resolve('/registro_fechas/new')
+    def test_url_registro_new_fecha_to_new_view(self):
+        found = resolve(reverse_lazy('new'))
         self.assertEqual(found.func, new)
 
-    def test_registro_fechas_carga_el_template_correcto(self):
+    def test_url_home_to_home_view(self):
+        found = resolve(reverse_lazy('home'))
+        self.assertEqual(found.func, home)
+
+    def test_new_view_get_render_new_template(self):
         request = HttpRequest()
         request.method = 'GET'
         response = new(request)
-        self.assertTrue(response.content.startswith(b'<html>'))
-        self.assertIn(b'<title>Registro de Fechas - Nuevo</title>', response.content)
-        self.assertTrue(response.content.endswith(b'</html>'))
+        expected_html = render_to_string('new.html', request=request)
+        self.assertHTMLEqual(response.content, expected_html)
 
-    def test_veo_nombre_en_formulario(self):
+    def test_search_view_get_render_search_template(self):
         request = HttpRequest()
         request.method = 'GET'
-        response = new(request)
-        self.assertIn(b'<form method="POST">', response.content)
-        self.assertIn(b'<label for="id_nombre"> Nombre </label>', response.content)
-        self.assertIn(b'<input id="id_nombre">', response.content)
-        self.assertIn(b'</form>', response.content)
+        response = home(request)
+        expected_html = render_to_string('home.html', request=request)
+        self.assertHTMLEqual(response.content, expected_html)
 
-    def test_al_guardar_formulario_guardo_nombre(self):
-        request = HttpRequest()
-        request.method = 'POST'
-        request.POST = {'nombre': 'Jaimito'}
-        new(request)
-
-        # Se ha guardado en el modelo?
-        registro = RegistroFechas.objects.first()
-        self.assertEqual(registro.nombre, 'Jaimito')
-
-
-
+    def test_new_view_post_redirects_to_home_template(self):
+        response = self.client.post(reverse_lazy('new'))
+        self.assertRedirects(response, reverse('home'))
 
