@@ -1,4 +1,3 @@
-from sqlite3 import OperationalError
 from unittest import TestCase
 
 from django.db import connections
